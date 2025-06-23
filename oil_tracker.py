@@ -53,3 +53,13 @@ if __name__ == "__main__":
             send_telegram_alert(f"⚠️ *Exit Alert* {now}\nOil price momentum weakening. Current price: ${latest_price:.2f}")
         elif momentum > 0.3:
             send_telegram_alert(f"🚨 *Buy Alert* {now}\nUpward price momentum detected. Current price: ${latest_price:.2f}")
+
+import requests
+
+requests.get(
+    f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+    params={
+        "chat_id": CHAT_ID,
+        "text": "🚨 Test message from Hormuz oil bot. Alerts are working!"
+    }
+)
