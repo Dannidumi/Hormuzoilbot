@@ -1,6 +1,5 @@
 import os
 import requests
-import time
 import logging
 from datetime import datetime
 
@@ -34,12 +33,16 @@ def send_telegram_alert(message):
         "text": message,
         "parse_mode": "Markdown"
     }
-    requests.post(url, data=payload)
+    response = requests.post(url, data=payload)
+    print("Telegram send status:", response.status_code)
+    print("Response:", response.text)
 
 # === MAIN LOGIC ===
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    history = []
+
+    # Optional: test message to confirm secure setup
+    send_telegram_alert("✅ Secure mode: Telegram alerts are working!")
 
     prices = get_oil_price()
     if prices:
@@ -53,13 +56,3 @@ if __name__ == "__main__":
             send_telegram_alert(f"⚠️ *Exit Alert* {now}\nOil price momentum weakening. Current price: ${latest_price:.2f}")
         elif momentum > 0.3:
             send_telegram_alert(f"🚨 *Buy Alert* {now}\nUpward price momentum detected. Current price: ${latest_price:.2f}")
-
-import requests
-
-requests.get(
-    f"https://api.telegram.org/bot7942291340:AAHHJ1ZuxClh7GwchbR67LMXLyuahrkP6jc/sendMessage",
-    params={
-        "chat_id": CHAT_ID,
-        "text": "🚨 Test message from Hormuz oil bot. Alerts are working!"
-    }
-)
