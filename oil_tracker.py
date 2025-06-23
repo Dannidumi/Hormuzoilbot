@@ -6,18 +6,24 @@ from datetime import datetime
 # === CONFIG ===
 BOT_TOKEN = "7942291340:AAHHJ1ZuxClh7GwchbR67LMXLyuahrkP6jc"
 CHAT_ID = "8169402426"
-PRICE_API_URL = "https://query1.finance.yahoo.com/v8/finance/chart/CL=F?interval=5m&range=1d"
+TWELVE_DATA_API_KEY = "542d93a2800d4bd38aba4ecf3d1b7a45"
+OIL_SYMBOL = "WTI/USD"
+PRICE_API_URL = f"https://api.twelvedata.com/time_series?symbol={OIL_SYMBOL}&interval=1min&outputsize=6&apikey={TWELVE_DATA_API_KEY}"
 
 # === FUNCTIONS ===
-def get_oil_price():
+def get_oil_prices():
     try:
         response = requests.get(PRICE_API_URL)
-        print("Yahoo API response code:", response.status_code)
-        print("Yahoo API response body:", response.text[:200])  # print first 200 chars
+        print("Twelve Data API response code:", response.status_code)
+        print("Twelve Data API response body:", response.text[:200])
         data = response.json()
-        prices = data["chart"]["result"][0]["indicators"]["quote"][0]["close"]
-        timestamps = data["chart"]["result"][0]["timestamp"]
-        return list(zip(timestamps, prices))
+        values = data.get("values", [])
+        if not values:
+            raise Exception("No price data returned")
+
+        # Extract latest closing prices in reverse order (oldest first)
+        closing_prices = [float(entry["close"]) for entry in reversed(values)]
+        return closing_prices
     except Exception as e:
         logging.error(f"Error fetching oil price: {e}")
         return []
@@ -25,7 +31,7 @@ def get_oil_price():
 def calculate_momentum(prices):
     if len(prices) < 6:
         return 0
-    diffs = [prices[i+1] - prices[i] for i in range(-6, -1)]
+    diffs = [prices[i+1] - prices[i] for i in range(len(prices)-1)]
     return sum(diffs) / len(diffs)
 
 def send_telegram_alert(message):
@@ -43,18 +49,14 @@ def send_telegram_alert(message):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    # Optional: test message to confirm secure setup
-    send_telegram_alert("✅ Secure mode: Telegram alerts are working!")
-
-    prices = get_oil_price()
+    prices = get_oil_prices()
     if prices:
-        latest_ts, latest_price = prices[-1]
-        history = [p for _, p in prices if p is not None]
-
-        momentum = calculate_momentum(history)
+        latest_price = prices[-1]
+        momentum = calculate_momentum(prices)
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
         if momentum < 0.05:
             send_telegram_alert(f"⚠️ *Exit Alert* {now}\nOil price momentum weakening. Current price: ${latest_price:.2f}")
         elif momentum > 0.3:
             send_telegram_alert(f"🚨 *Buy Alert* {now}\nUpward price momentum detected. Current price: ${latest_price:.2f}")
+
