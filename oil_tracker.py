@@ -4,8 +4,8 @@ import logging
 from datetime import datetime
 
 # === CONFIG ===
-BOT_TOKEN = "7942291340:AAFV7a2TvdKBYIS09SNmunTCII2W9WhNXw"
-CHAT_ID = "8169402426"
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 PRICE_API_URL = "https://query1.finance.yahoo.com/v8/finance/chart/CL=F?interval=5m&range=1d"
 
 # === FUNCTIONS ===
