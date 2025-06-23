@@ -12,6 +12,8 @@ PRICE_API_URL = "https://query1.finance.yahoo.com/v8/finance/chart/CL=F?interval
 def get_oil_price():
     try:
         response = requests.get(PRICE_API_URL)
+        print("Yahoo API response code:", response.status_code)
+        print("Yahoo API response body:", response.text[:200])  # print first 200 chars
         data = response.json()
         prices = data["chart"]["result"][0]["indicators"]["quote"][0]["close"]
         timestamps = data["chart"]["result"][0]["timestamp"]
