@@ -57,7 +57,7 @@ if __name__ == "__main__":
 import requests
 
 requests.get(
-    f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+    f"https://api.telegram.org/bot7942291340:AAHHJ1ZuxClh7GwchbR67LMXLyuahrkP6jc/sendMessage",
     params={
         "chat_id": CHAT_ID,
         "text": "🚨 Test message from Hormuz oil bot. Alerts are working!"
